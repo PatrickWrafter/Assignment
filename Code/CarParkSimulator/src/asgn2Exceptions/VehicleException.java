@@ -1,5 +1,11 @@
 package asgn2Exceptions;
 
-public class VehicleException {
 
+@SuppressWarnings("Serial")
+public class VehicleException extends Exception {
+
+	
+	public VehicleException(String message) {
+		super("Simulation Exception: " + message);
+	}
 }

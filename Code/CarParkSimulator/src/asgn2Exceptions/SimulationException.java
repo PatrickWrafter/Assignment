@@ -1,5 +1,11 @@
 package asgn2Exceptions;
 
-public class SimulationException {
 
+@SuppressWarnings("serial")
+public class SimulationException extends Exception {
+
+	public SimulationException(String message){
+		super("Simulation Exception: " + message);
+	}
+	
 }
