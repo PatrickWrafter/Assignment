@@ -5,6 +5,8 @@ import asgn2Exceptions.VehicleException;
 import asgn2Simulators.Constants;
 
 public class Vehicle {
+	private String vehID;
+	protected int arrivalTime;
 	/**
 	 * Vehicle Constructor 
 	 * @param vehID String identification number or plate of the vehicle
@@ -84,6 +86,7 @@ public class Vehicle {
 	 * @return the vehID
 	 */
 	public String getVehID() {
+		return vehID;
 	}
 
 	/**

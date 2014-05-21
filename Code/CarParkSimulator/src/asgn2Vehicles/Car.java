@@ -2,7 +2,7 @@ package asgn2Vehicles;
 
 import asgn2Exceptions.VehicleException;
 
-public class Car {
+public class Car extends Vehicle {
 	
 	private boolean small; 
 
@@ -15,6 +15,13 @@ public class Car {
 	 * @throws VehicleException if arrivalTime is <= 0  
 	 */
 	public Car(String vehID, int arrivalTime, boolean small) throws VehicleException {
+		this.small = small; 
+		this.arrivalTime = arrivalTime;
+		this.vehID = vehID;
+		
+		if (arrivalTime <= 0){
+			throw new VehicleException("Arrival time 0 or earlier.");
+		}
 	}
 
 	/**
@@ -23,6 +30,7 @@ public class Car {
 	 * @return true if small parking space, false otherwise
 	 */
 	public boolean isSmall() {
+		return small;
 	}
 
 	/* (non-Javadoc)
@@ -30,5 +38,6 @@ public class Car {
 	 */
 	@Override
 	public String toString() {
+		return null;
 	}
 }
