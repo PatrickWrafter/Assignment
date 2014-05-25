@@ -15,9 +15,9 @@ public class Car extends Vehicle {
 	 * @throws VehicleException if arrivalTime is <= 0  
 	 */
 	public Car(String vehID, int arrivalTime, boolean small) throws VehicleException {
+		super(vehID, arrivalTime);
 		this.small = small; 
-		this.arrivalTime = arrivalTime;
-		this.vehID = vehID;
+		
 		
 		if (arrivalTime <= 0){
 			throw new VehicleException("Arrival time 0 or earlier.");

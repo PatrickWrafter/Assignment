@@ -155,3 +155,4 @@ public class MotorCycleTests {
 	public void testToString() {
 		fail("Not yet implemented"); // TODO
 }
+}
