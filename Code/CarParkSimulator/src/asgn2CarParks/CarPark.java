@@ -21,16 +21,22 @@ public class CarPark {
 	private int maxSmallCarSpaces = 0;
 	private int maxCarSpaces = 0;
 	private int count =0;
+	private int countCars=0;
+	private int countMotorCycles = 0;
+	private int countSmallCars = 0;
 	private int numSmallCars = 0;
 	private int numCars = 0;
 	private int numMotorCycles = 0;
 	private int numDissatisfied = 0;
 	
-	private LinkedList<Vehicle> queue = null;
+	
+	
+	private LinkedList<Vehicle> queue;
 	private LinkedList<Vehicle> past;
 	private LinkedList<Vehicle> failures;
 	private LinkedList<Vehicle> newVehicles;
-	private Object spaces;
+	private LinkedList<Vehicle> carPark;
+	private String status;
 
 	public CarPark(){
 		this(Constants.DEFAULT_MAX_CAR_SPACES,Constants.DEFAULT_MAX_SMALL_CAR_SPACES,
@@ -52,21 +58,32 @@ public class CarPark {
 	}
 	
 	public void archiveNewVehicle(Vehicle v) throws SimulationException {
-		if (){
+		if (v.isParked()||v.isQueued()){
 			throw new SimulationException("Vehicle is currently queued or parked");
 		}
 		newVehicles.add(v);
 	}
 	
 	public void archiveQueueFailures(int time) throws VehicleException {
+		Iterator<Vehicle> it = queue.iterator();  
+		while (it.hasNext()){
+			Vehicle nextCar = it.next();
+			if (time - nextCar.getArrivalTime() > Constants.MAXIMUM_QUEUE_TIME){
+				newVehicles.add(nextCar);
+				numDissatisfied++;
+			}
+		}
 	}
 	
 	public boolean carParkEmpty() {
-		return false;
+		return carPark.isEmpty();
 	}
 	
 	public boolean carParkFull() {
-		return false;
+		if (carPark.size() >= (maxCarSpaces+maxMotorCycleSpaces+maxSmallCarSpaces)){
+			return true;
+		}
+		else return false;
 	}
 	
 	public void enterQueue(Vehicle v) throws SimulationException, VehicleException {
@@ -104,23 +121,23 @@ public class CarPark {
 	}
 	
 	public int getNumCars() {
-		return 0;
+		return countCars;
 	}
 	
 	public int getNumMotorCycles() {
-		return numMotorCycles;
+		return countMotorCycles;
 	}
 	
 	public int getNumSmallCars() {
-		return numSmallCars;
+		return countSmallCars;
 	}
 	
 	public String getStatus(int time) {
 		String str = time +"::"
 		+ this.count + "::" 
-		+ "P:" + this.spaces.size() + "::"
-		+ "C:" + this.numCars + "::S:" + this.numSmallCars 
-		+ "::M:" + this.numMotorCycles 
+		+ "P:" + this.carPark.size() + "::"
+		+ "C:" + this.countCars + "::S:" + this.countSmallCars 
+		+ "::M:" + this.countMotorCycles 
 		+ "::D:" + this.numDissatisfied 
 		+ "::A:" + this.past.size()  
 		+ "::Q:" + this.queue.size(); 
@@ -149,36 +166,184 @@ public class CarPark {
 	
 	
 	public int numVehiclesInQueue() {
-		return 0;
+		return queue.size();
 	}
 	
 	public void parkVehicle(Vehicle v, int time, int intendedDuration) throws SimulationException, VehicleException {
+		// Exception handling
+		if (v.isParked() || v.isQueued()){
+			throw new VehicleException("Car is already parked");
+		}
+		 
+		
+		
+		// Add Car to Park
+		if (v.getClass() == Car.class){
+			Car car = Car.class.cast(v);
+			if (car.isSmall()){
+				if (numSmallCars < maxSmallCarSpaces){
+					numSmallCars++;
+					countSmallCars++;
+					count++;
+					carPark.add(v);
+					v.enterParkedState(time, intendedDuration);
+				}
+				else if (numCars < maxCarSpaces){
+					numCars++;
+					countSmallCars++;
+					count++;
+					carPark.add(v);
+					v.enterParkedState(time, intendedDuration);
+				}
+				else throw new SimulationException("No Available spots for new car");
+				
+				
+				
+			}
+		
+			else{
+				if (numCars >= maxCarSpaces){
+					throw new SimulationException("No Available spots for new car");
+				}
+				numCars++;
+				countCars++;
+				count++;
+				carPark.add(v);
+				v.enterParkedState(time, intendedDuration);
+			}
+		}
+		// Add MotorCycle to Park
+		else {
+			if (numMotorCycles < maxMotorCycleSpaces){
+				numMotorCycles++;
+				countMotorCycles++;
+				count++;
+				carPark.add(v);
+				v.enterParkedState(time, intendedDuration);
+			}
+			else if (numSmallCars < maxSmallCarSpaces){
+				countMotorCycles++;
+				numSmallCars++;
+				count++;
+				carPark.add(v);
+				v.enterParkedState(time, intendedDuration);
+			}
+			else {throw new SimulationException("No Available Spots for new car");}
+		}	
 	}
+		
 	
 	public void processQueue(int time, Simulator sim) throws VehicleException, SimulationException {
+		boolean active = true;
+		
+		while (active){
+			Vehicle nextCar = queue.peek();
+			
+			// Exceptions
+			if (nextCar.isParked()){
+				throw new SimulationException("Vehicle is already parked");
+			}
+			if ((time - nextCar.getArrivalTime()) > Constants.MAXIMUM_QUEUE_TIME){
+				throw new SimulationException("Vehicle has been in queue too long");
+			}
+			
+			// Check to see if next car can be parked
+			if (spacesAvailable(nextCar)){
+				nextCar = queue.pop();
+				nextCar.exitQueuedState(time);
+				parkVehicle(nextCar, time, sim.setDuration());
+			}
+			// If car cannot be parked, queue stops processing
+			else active = false;
+			
+		}
+		
 	}
+		
+	
 	
 	public boolean queueEmpty() {
-		return false;
+		return (queue.size() == maxQueueSize);
 	}
 	
 	public boolean queueFull() {
-		return false;
+		return (queue.size() == 0);
 	}
 	
 	public boolean spacesAvailable(Vehicle v) {
-		return false;
+		if (v.getClass() == Car.class){
+			Car car = Car.class.cast(v);
+			if (car.isSmall()){
+				return (numSmallCars < maxSmallCarSpaces || numCars < maxCarSpaces);
+			}
+			else
+				return (numCars < maxCarSpaces);
+		}
+		else if (v.getClass() == MotorCycle.class){
+			return (numMotorCycles < maxMotorCycleSpaces || numSmallCars < maxSmallCarSpaces);
+		}
+		
+		else
+			return false;
 	}
 	
 	@Override
 	public String toString() {
-		return null;
+		return "CarPark [count: "+ count + " numCars: "
+				+countCars+" numSmallCars: "+countSmallCars +
+				" numMotorCycles: "	+ countMotorCycles	+
+				" queue: " 	+ (queue.size()) + " numDissatisfied: "
+				+numDissatisfied + " past: " + past.size() +"]";
+				
 	}
 	
 	public void tryProcessNewVehicles(int time,Simulator sim) throws VehicleException, SimulationException {
+		
+		if (sim.newCarTrial()){
+			String vehID = "C" + this.count;
+			Car newVehicle = new Car(vehID, time, false);
+			archiveNewVehicle(newVehicle);
+		}		
+		
+		if (sim.smallCarTrial()){
+			String vehID = "C" + this.count;
+			Car newVehicle = new Car(vehID, time, true);
+			archiveNewVehicle(newVehicle);
+		}
+		
+		if (sim.motorCycleTrial()){
+			String vehID = "V" + this.count;
+			MotorCycle newVehicle = new MotorCycle(vehID, time);
+			archiveNewVehicle(newVehicle);	
+		}
+		
+		
 	}
 	
 	public void unparkVehicle(Vehicle v,int departureTime) throws VehicleException, SimulationException {
+		if (v.isQueued() || !v.isParked()){
+			throw new VehicleException("Vehicle isn't parked.");
+		}
+		if (!carPark.contains(v)){
+			throw new SimulationException("Vehicle isn't in car park");
+		}
+		v.exitParkedState(departureTime);
+		past.add(v);
+		carPark.remove(v);
+		if (v instanceof Car){
+			if (((Car)v).isSmall()){
+				numSmallCars--;
+				countSmallCars--;
+			}
+			else{
+				numCars--;
+				countCars--;
+			}	
+		}
+		else{
+			numMotorCycles--;
+			countMotorCycles--;
+		}
 	}
 	
 	private String setVehicleMsg(Vehicle v,String source, String target) {

@@ -38,6 +38,24 @@ public class Car extends Vehicle {
 	 */
 	@Override
 	public String toString() {
-		return null;
+		String carMessage;
+		String queueMessage;
+		if (wasQueued()){
+			queueMessage = "Vehicle was Queued";
+		}
+		else {queueMessage = "Vehicle was not Queued";}
+		
+		if (isSmall()){
+			carMessage = "Vehicle can use small car spaces";
+		}
+		else {carMessage = "Vehicle cannot use small car spaces";}
+		
+		return "Vehicle vehID: "+vehID + "\n" + "Arrival Time: " 
+				+ arrivalTime + "\n" + queueMessage + "\n" +
+				"Entry to carpark: " + arrivalTime + "\n" +
+				"Exit from carpark: " + exitTime + "\n" + 
+				"Parking time: " + parkingTime + "\n" + 
+				"Customer was satisfied: " + satisfied + "\n" +
+				carMessage;
 	}
 }

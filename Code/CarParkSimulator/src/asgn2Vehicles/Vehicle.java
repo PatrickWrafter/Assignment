@@ -13,11 +13,11 @@ public class Vehicle {
 	private boolean wasParked = false;
 	private boolean wasQueued = false;
 	private boolean inQueue = false;
-	private boolean satisfied = true; 
+	protected boolean satisfied = true; 
 	private int intendedDuration = 0;
-	private int parkingTime = 0;
+	protected int parkingTime = 0;
 	private int departureTime = 0;
-	private int exitTime;
+	protected int exitTime;
 	
 	
 	/**
@@ -49,7 +49,7 @@ public class Vehicle {
 	 *         or if intendedDuration is less than the minimum prescribed in asgnSimulators.Constants
 	 */
 	public void enterParkedState(int parkingTime, int intendedDuration) throws VehicleException {
-		if (parked){
+		if (parked || inQueue){
 			throw new VehicleException("Already Parked");
 		}
 		if (parkingTime<=0){
@@ -59,7 +59,7 @@ public class Vehicle {
 			throw new VehicleException("Intended duration too short");
 		}
 		
-		inQueue = false;
+		
 		parked = true; 
 		wasParked = true;
 		this.intendedDuration = intendedDuration;
@@ -195,8 +195,11 @@ public class Vehicle {
 		if (!wasParked()&wasQueued()){
 			satisfied = false;
 		}
-		if (wasParked() & ((parkingTime-arrivalTime) > Constants.MAXIMUM_QUEUE_TIME)){
+		else if (((parkingTime-arrivalTime) > Constants.MAXIMUM_QUEUE_TIME)){
 			satisfied = false; 
+		}
+		else if (!wasQueued()){
+			satisfied = false;
 		}
 		return satisfied;
 	}
@@ -206,7 +209,20 @@ public class Vehicle {
 	 */
 	@Override
 	public String toString() {
-		return null;
+		String queueMessage;
+		if (wasQueued){
+			queueMessage = "Vehicle was Queued";
+		}
+		else {queueMessage = "Vehicle was not Queued";}
+		
+		return "Vehicle vehID: "+vehID + "\n" + "Arrival Time: " 
+				+ arrivalTime + "\n" + queueMessage + "\n" +
+				"Entry to carpark: " + arrivalTime + "\n" +
+				"Exit from carpark: " + exitTime + "\n" + 
+				"Parking time: " + parkingTime + "\n" + 
+				"Customer was satisfied: " + satisfied + "\n" +
+				"Vehicle type: MotorCyle";
+				
 	}
 
 	/**
