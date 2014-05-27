@@ -31,11 +31,11 @@ public class CarPark {
 	
 	
 	
-	private LinkedList<Vehicle> queue;
-	private LinkedList<Vehicle> past;
-	private LinkedList<Vehicle> failures;
-	private LinkedList<Vehicle> newVehicles;
-	private LinkedList<Vehicle> carPark;
+	private LinkedList<Vehicle> queue = new LinkedList();
+	private LinkedList<Vehicle> past = new LinkedList();
+	private LinkedList<Vehicle> failures = new LinkedList();
+	private LinkedList<Vehicle> newVehicles = new LinkedList();
+	private LinkedList<Vehicle> carPark = new LinkedList();
 	private String status;
 
 	public CarPark(){
@@ -54,21 +54,59 @@ public class CarPark {
 	
 	
 	public void archiveDepartingVehicles(int time,boolean force) throws VehicleException, SimulationException {
+		if (carParkEmpty()){
+			throw new SimulationException("Car Park is empty");
+		}
+		if (force){ 
+			while (!carPark.isEmpty()){
+				Vehicle nextCar = carPark.getFirst();
+				if (!nextCar.isParked()){
+					throw new VehicleException("Vehicle isn't parked");
+				}
+				nextCar.exitParkedState(time);
+				past.add(nextCar);
+				
+				setVehicleMsg(nextCar, "P", "A");
+			}
+		}
 		
+		else {
+			Iterator<Vehicle> it = this.carPark.iterator();  
+			while (it.hasNext()){
+				Vehicle vehicle = it.next();
+				if (!vehicle.isParked()){
+					throw new VehicleException("Vehicle isn't parked");
+				}
+				
+				if ((it.next().getDepartureTime()) == time){
+					vehicle.exitParkedState(time);
+					past.add(vehicle);
+					
+					it.remove();
+					
+				
+				}
+			}
+		}
 	}
 	
 	public void archiveNewVehicle(Vehicle v) throws SimulationException {
 		if (v.isParked()||v.isQueued()){
 			throw new SimulationException("Vehicle is currently queued or parked");
 		}
-		newVehicles.add(v);
-	}
+		this.newVehicles.add(v);
+		
+		}
 	
-	public void archiveQueueFailures(int time) throws VehicleException {
+	public void archiveQueueFailures(int time)  {
+		
+		
 		Iterator<Vehicle> it = queue.iterator();  
 		while (it.hasNext()){
 			Vehicle nextCar = it.next();
+			
 			if (time - nextCar.getArrivalTime() > Constants.MAXIMUM_QUEUE_TIME){
+				
 				newVehicles.add(nextCar);
 				numDissatisfied++;
 			}
@@ -76,7 +114,7 @@ public class CarPark {
 	}
 	
 	public boolean carParkEmpty() {
-		return carPark.isEmpty();
+		return this.carPark.isEmpty();
 	}
 	
 	public boolean carParkFull() {
@@ -171,12 +209,10 @@ public class CarPark {
 	
 	public void parkVehicle(Vehicle v, int time, int intendedDuration) throws SimulationException, VehicleException {
 		// Exception handling
-		if (v.isParked() || v.isQueued()){
+		if (v.isParked()){
 			throw new VehicleException("Car is already parked");
 		}
 		 
-		
-		
 		// Add Car to Park
 		if (v.getClass() == Car.class){
 			Car car = Car.class.cast(v);
@@ -234,27 +270,27 @@ public class CarPark {
 		
 	
 	public void processQueue(int time, Simulator sim) throws VehicleException, SimulationException {
-		boolean active = true;
-		
-		while (active){
-			Vehicle nextCar = queue.peek();
 			
+		while (!queue.isEmpty()){
+						
 			// Exceptions
-			if (nextCar.isParked()){
+			if (queue.peek().isParked()){
 				throw new SimulationException("Vehicle is already parked");
 			}
-			if ((time - nextCar.getArrivalTime()) > Constants.MAXIMUM_QUEUE_TIME){
+			if ((time - queue.peek().getArrivalTime()) > Constants.MAXIMUM_QUEUE_TIME){
 				throw new SimulationException("Vehicle has been in queue too long");
 			}
 			
 			// Check to see if next car can be parked
-			if (spacesAvailable(nextCar)){
-				nextCar = queue.pop();
-				nextCar.exitQueuedState(time);
-				parkVehicle(nextCar, time, sim.setDuration());
+			if (spacesAvailable(queue.peek())){
+				Vehicle newVehicle = queue.pop();
+				newVehicle.exitQueuedState(time);
+				if (newVehicle.isParked()){
+					throw new VehicleException("Vehicle is already parked");
+				}
+				parkVehicle(newVehicle, time, sim.setDuration());
 			}
-			// If car cannot be parked, queue stops processing
-			else active = false;
+		
 			
 		}
 		
@@ -263,7 +299,7 @@ public class CarPark {
 	
 	
 	public boolean queueEmpty() {
-		return (queue.size() == maxQueueSize);
+		return (this.queue.size() == maxQueueSize);
 	}
 	
 	public boolean queueFull() {
@@ -316,7 +352,9 @@ public class CarPark {
 			MotorCycle newVehicle = new MotorCycle(vehID, time);
 			archiveNewVehicle(newVehicle);	
 		}
-		
+		while (!newVehicles.isEmpty()){
+			queue.add(newVehicles.pop());
+		}
 		
 	}
 	

@@ -22,8 +22,18 @@ public class Simulator {
 	 */
 	public Simulator() throws SimulationException {
 		this(Constants.DEFAULT_SEED,Constants.DEFAULT_INTENDED_STAY_MEAN,Constants.DEFAULT_INTENDED_STAY_SD,
-	 		 Constants.DEFAULT_CAR_PROB,Constants.DEFAULT_SMALL_CAR_PROB,
-			 Constants.DEFAULT_MOTORCYCLE_PROB);
+		 		 Constants.DEFAULT_CAR_PROB,Constants.DEFAULT_SMALL_CAR_PROB,
+				 Constants.DEFAULT_MOTORCYCLE_PROB);
+		if (meanStay < 0 || sdStay < 0){
+			throw new SimulationException("Invalid mean or standard Stay");
+		}
+		if (carProb < 0 || smallCarProb < 0 || mcProb < 0){
+			throw new SimulationException("One or more probabilities less than 0");
+		}
+		if (carProb >1 || smallCarProb >1|| mcProb >1){
+			throw new SimulationException("One or more probabilities greater than 1");
+		}
+		
 	}
 
 	/**

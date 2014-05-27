@@ -2,6 +2,7 @@ package asgn2Simulators;
 
 
 import java.io.IOException;
+
 import asgn2CarParks.CarPark;
 import asgn2Exceptions.SimulationException;
 import asgn2Exceptions.VehicleException;
@@ -31,6 +32,7 @@ public class SimulationRunner {
 	 * @throws SimulationException if Simulation constraints are violated 
 	 * @throws IOException on logging failures
 	 */
+	/**
 	public void runSimulation() throws VehicleException, SimulationException, IOException {
 		this.log.initialEntry(this.carPark,this.sim);
 		for (int time=0; time<=Constants.CLOSING_TIME; time++) {
@@ -57,11 +59,12 @@ public class SimulationRunner {
 		}
 		this.log.finalise(this.carPark);
 	}
-
+	**/
 	/**
 	 * Main program for the simulation 
 	 * @param args Arguments to the simulation 
 	 */
+	
 	public static void main(String[] args) {
 		CarPark cp = new CarPark();
 		Simulator s = null;
@@ -76,14 +79,7 @@ public class SimulationRunner {
 		
 		//TODO: Implement Argument Processing 
 		
-		//Run the simulation 
-		SimulationRunner sr = new SimulationRunner(cp,s,l);
-		try {
-			sr.runSimulation();
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(-1);
-		} 
+
 	} 
 
 	/**

@@ -30,7 +30,7 @@ public class Vehicle {
 	public Vehicle(String vehID,int arrivalTime) throws VehicleException  {
 		this.vehID = vehID;
 		
-		if (arrivalTime <=0){
+		if (arrivalTime <0){
 			throw new VehicleException("Invalid arrival time.");
 		}
 		
@@ -116,9 +116,6 @@ public class Vehicle {
 		if (parked){
 			throw new VehicleException("Car is already parked");
 		}
-		if (!inQueue){
-			throw new VehicleException("Car is currently not in Queue");
-		}
 		if (exitTime < arrivalTime){
 			throw new VehicleException("Exit time occurs before arrival");
 		}
@@ -143,7 +140,7 @@ public class Vehicle {
 	 */
 	public int getDepartureTime() {
 		if (parked){
-			return intendedDuration+arrivalTime;
+			return intendedDuration+parkingTime;
 		}
 		else if (wasParked()){
 			return departureTime;
@@ -173,7 +170,7 @@ public class Vehicle {
 	 * @return true if the vehicle is in a parked state; false otherwise
 	 */
 	public boolean isParked() {
-		return parked;
+		return this.parked;
 	}
 
 	/**
@@ -192,6 +189,8 @@ public class Vehicle {
 	 * @return true if satisfied, false if never in parked state or if queuing time exceeds max allowable 
 	 */
 	public boolean isSatisfied() {
+		
+		
 		if (!wasParked()&wasQueued()){
 			satisfied = false;
 		}

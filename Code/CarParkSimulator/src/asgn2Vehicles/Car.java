@@ -19,7 +19,7 @@ public class Car extends Vehicle {
 		this.small = small; 
 		
 		
-		if (arrivalTime <= 0){
+		if (arrivalTime < 0){
 			throw new VehicleException("Arrival time 0 or earlier.");
 		}
 	}

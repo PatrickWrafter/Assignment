@@ -21,12 +21,15 @@ BufferedWriter writer = null;
 	 * @throws IOException if log file  or BufferedWriter cannot be created
 	 */
 	public Log () throws IOException {
+		
+		
 		//File management based on http://stackoverflow.com/questions/15754523/how-to-write-text-file-java 
         File logFile = new File(getLogTime());
 
         // This will output the full path where the file will be written to...
         System.out.println(logFile.getCanonicalPath());
         this.writer = new BufferedWriter(new FileWriter(logFile));
+        
 	}
 	
 	/**
